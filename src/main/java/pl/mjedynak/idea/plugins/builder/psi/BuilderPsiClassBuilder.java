@@ -11,23 +11,17 @@ import pl.mjedynak.idea.plugins.builder.settings.CodeStyleSettings;
 import pl.mjedynak.idea.plugins.builder.writer.BuilderContext;
 
 import java.util.List;
-import java.util.Locale;
-
-import static com.intellij.openapi.util.text.StringUtil.isVowel;
 
 public class BuilderPsiClassBuilder {
 
     private static final String PRIVATE_STRING = "private";
     private static final String SPACE = " ";
-    private static final String A_PREFIX = " a";
-    private static final String AN_PREFIX = " an";
     private static final String SEMICOLON = ",";
     static final String STATIC_MODIFIER = "static";
 
     private PsiHelper psiHelper = new PsiHelper();
     private PsiFieldsModifier psiFieldsModifier = new PsiFieldsModifier();
     private CodeStyleSettings codeStyleSettings = new CodeStyleSettings();
-    private ButMethodCreator butMethodCreator;
     private MethodCreator methodCreator;
 
     private PsiClass srcClass = null;
@@ -65,7 +59,6 @@ public class BuilderPsiClassBuilder {
         psiFieldsForSetters = context.getPsiFieldsForBuilder().getFieldsForSetters();
         psiFieldsForConstructor = context.getPsiFieldsForBuilder().getFieldsForConstructor();
         methodCreator = new MethodCreator(elementFactory, builderClassName);
-        butMethodCreator = new ButMethodCreator(elementFactory);
     }
 
     public BuilderPsiClassBuilder withFields() {
@@ -81,9 +74,8 @@ public class BuilderPsiClassBuilder {
     }
 
     public BuilderPsiClassBuilder withInitializingMethod() {
-        String prefix = isVowel(srcClassName.toLowerCase(Locale.ENGLISH).charAt(0)) ? AN_PREFIX : A_PREFIX;
         PsiMethod staticMethod = elementFactory.createMethodFromText(
-                "public static " + builderClassName + prefix + srcClassName + "() { return new " + builderClassName + "();}", srcClass);
+                "public static " + builderClassName + SPACE + StringUtils.uncapitalize(builderClassName) + "() { return new " + builderClassName + "();}", srcClass);
         builderClass.add(staticMethod);
         return this;
     }
@@ -95,12 +87,6 @@ public class BuilderPsiClassBuilder {
         for (PsiField psiFieldForConstructor : psiFieldsForConstructor) {
             createAndAddMethod(psiFieldForConstructor, methodPrefix);
         }
-        return this;
-    }
-
-    public BuilderPsiClassBuilder withButMethod() {
-        PsiMethod method = butMethodCreator.butMethod(builderClassName, builderClass, srcClass);
-        builderClass.add(method);
         return this;
     }
 

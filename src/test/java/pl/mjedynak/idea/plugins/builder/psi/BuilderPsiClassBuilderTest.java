@@ -10,6 +10,7 @@ import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.impl.source.PsiFieldImpl;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +27,8 @@ import java.util.List;
 import static org.apache.commons.lang.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -138,8 +141,7 @@ public class BuilderPsiClassBuilderTest {
     public void shouldAddInitializingMethod() {
         // given
         PsiMethod method = mock(PsiMethod.class);
-        given(elementFactory.createMethodFromText(
-                "public static " + builderClassName + " a" + srcClassName + "() { return new " + builderClassName + "();}", srcClass)).willReturn(method);
+        given(elementFactory.createMethodFromText(anyString(), eq(srcClass))).willReturn(method);
 
         // when
         psiClassBuilder.aBuilder(context).withInitializingMethod();
@@ -147,6 +149,7 @@ public class BuilderPsiClassBuilderTest {
         // then
         verify(builderClass).add(method);
         verifyNoMoreInteractions(builderClass);
+        verify(elementFactory).createMethodFromText("public static BuilderClassName builderClassName() { return new " + builderClassName + "();}", srcClass);
     }
 
     @Test
@@ -156,7 +159,7 @@ public class BuilderPsiClassBuilderTest {
         String srcClassNameStartingWithVowel = "Inventory";
         given(srcClass.getName()).willReturn(srcClassNameStartingWithVowel);
         given(elementFactory.createMethodFromText(
-                "public static " + builderClassName + " an" + srcClassNameStartingWithVowel + "() { return new " + builderClassName + "();}", srcClass)).willReturn(method);
+                "public static " + builderClassName + " " + StringUtils.uncapitalize(builderClassName) + "() { return new " + builderClassName + "();}", srcClass)).willReturn(method);
 
         // when
         psiClassBuilder.aBuilder(context).withInitializingMethod();
@@ -188,21 +191,6 @@ public class BuilderPsiClassBuilderTest {
         verify(builderClass).add(methodForFieldForSetter);
         verify(builderClass).add(methodForFieldForConstructor);
         verifyNoMoreInteractions(builderClass);
-    }
-
-    @Test
-    public void shouldAddButMethod() {
-        // given
-        given(butMethodCreator.butMethod(builderClassName, builderClass, srcClass)).willReturn(psiMethod);
-        BuilderPsiClassBuilder builder = psiClassBuilder.aBuilder(context);
-        setField(builder, "butMethodCreator", butMethodCreator);
-
-        // when
-        BuilderPsiClassBuilder result = builder.withButMethod();
-
-        // then
-        verify(builderClass).add(psiMethod);
-        assertThat(result).isSameAs(psiClassBuilder);
     }
 
     @Test

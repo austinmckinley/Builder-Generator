@@ -51,8 +51,7 @@ public class BuilderWriterComputable implements Computable<PsiElement> {
                 .withFields()
                 .withPrivateConstructor()
                 .withInitializingMethod()
-                .withSetMethods(context.getMethodPrefix())
-                .withButMethod();
+                .withSetMethods(context.getMethodPrefix());
         return builder.build();
     }
 
@@ -61,8 +60,7 @@ public class BuilderWriterComputable implements Computable<PsiElement> {
                 .withFields()
                 .withPrivateConstructor()
                 .withInitializingMethod()
-                .withSetMethods(context.getMethodPrefix())
-                .withButMethod();
+                .withSetMethods(context.getMethodPrefix());
         return builder.build();
     }
 
